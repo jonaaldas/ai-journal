@@ -104,8 +104,6 @@ export const messageMetadata = sqliteTable('message_metadata', {
     .notNull(),
 })
 
-import { index } from 'drizzle-orm/sqlite-core'
-
 export const subscriptions = sqliteTable(
   'subscriptions',
   {
@@ -151,3 +149,5 @@ export const stream = sqliteTable(
 )
 
 export type Stream = InferSelectModel<typeof stream>
+export type Message = InferSelectModel<typeof messages>
+export type Conversation = InferSelectModel<typeof conversations>

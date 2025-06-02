@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "ai-journal",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -28,9 +29,6 @@
       "favicon": "./assets/favicon.png",
       "output": "server"
     },
-    "plugins": [
-      "expo-sqlite",
-      "expo-router"
-    ]
+    "plugins": ["expo-sqlite", "expo-router"]
   }
 }
