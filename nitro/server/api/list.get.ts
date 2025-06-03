@@ -1,12 +1,17 @@
 import { Attachment, UIMessage } from 'ai'
-import { desc, eq, inArray } from 'drizzle-orm'
+import { asc, desc, eq, inArray } from 'drizzle-orm'
 import { createError } from 'h3'
 import { db } from '~~/db'
 import { conversations, messages } from '~~/db/schema'
 import type { Message as MessageType } from '~~/db/schema'
+import defineAuthenticatedEventHandler from '../utils/auth-handler'
+type ChatWithMessages = {
+  conversation: typeof conversations.$inferSelect
+  messages: UIMessage[]
+}
 
-export default defineEventHandler(async event => {
-  const userId = 'TWbp07aBFY36zCqT9Xh1eVM3f1UH4kgx'
+export default defineAuthenticatedEventHandler(async event => {
+  const userId = event.context.user.id
 
   if (!userId) {
     throw createError({
@@ -34,7 +39,7 @@ export default defineEventHandler(async event => {
           userChats.map(chat => chat.id)
         )
       )
-      .orderBy(desc(messages.createdAt))
+      .orderBy(asc(messages.createdAt))
     const uiMessages = convertToUIMessages(allMessages)
 
     const messagesByConversation = uiMessages.reduce((acc, msg) => {
@@ -46,7 +51,7 @@ export default defineEventHandler(async event => {
       return acc
     }, {} as Record<string, any[]>)
 
-    const chatsWithMessages = userChats.map(conversation => ({
+    const chatsWithMessages: ChatWithMessages[] = userChats.map(conversation => ({
       conversation: {
         ...conversation,
         createdAt: new Date(conversation.createdAt),

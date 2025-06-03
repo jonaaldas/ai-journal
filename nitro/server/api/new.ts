@@ -1,10 +1,10 @@
 import { createError } from 'h3'
+import defineAuthenticatedEventHandler from '../utils/auth-handler'
 import { db } from '~~/db'
 import { conversations } from '~~/db/schema'
 
-// export default defineAuthenticatedEventHandler(async event => {
-export default defineEventHandler(async event => {
-  const userId = 'TWbp07aBFY36zCqT9Xh1eVM3f1UH4kgx'
+export default defineAuthenticatedEventHandler(async event => {
+  const userId = event.context.user.id
   try {
     const newChat = await db
       .insert(conversations)

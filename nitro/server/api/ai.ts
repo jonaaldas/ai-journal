@@ -4,6 +4,7 @@ import { db } from '~~/db'
 import { eq } from 'drizzle-orm'
 import { stream } from '~~/db/schema'
 import { messages as messagesTable } from '~~/db/schema'
+import defineAuthenticatedEventHandler from '../utils/auth-handler'
 
 const languageModel = customProvider({
   languageModels: {
@@ -19,11 +20,12 @@ const languageModel = customProvider({
     'small-model': openai.image('gpt-4o-mini'),
   },
 })
+
 export default defineLazyEventHandler(async () => {
-  return defineEventHandler(async (event: any) => {
-    const { messages } = await readBody(event)
-    const userId = 'TWbp07aBFY36zCqT9Xh1eVM3f1UH4kgx'
-    const conversationID = '5dc53a9ce8e7481b8a4a685bc2ced58d'
+  return defineAuthenticatedEventHandler(async event => {
+    const { messages, conversationId } = await readBody(event)
+    const userId = event.context.user.id
+    const conversationID = conversationId
     const prevMessages = await db
       .select()
       .from(messagesTable)

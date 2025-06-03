@@ -2,9 +2,10 @@ import { eq } from 'drizzle-orm'
 import { createError } from 'h3'
 import { db } from '~~/db'
 import { conversations } from '~~/db/schema'
+import defineAuthenticatedEventHandler from '../utils/auth-handler'
 
-export default defineEventHandler(async event => {
-  const userId = 'TWbp07aBFY36zCqT9Xh1eVM3f1UH4kgx'
+export default defineAuthenticatedEventHandler(async event => {
+  const userId = event.context.user.id
   const conversationId = getQuery(event).id
 
   if (!conversationId) {
@@ -18,7 +19,7 @@ export default defineEventHandler(async event => {
     const conversation = await db
       .select()
       .from(conversations)
-      .where(eq(conversations.id, conversationId))
+      .where(eq(conversations.id, conversationId as string))
       .then(rows => rows[0])
 
     if (!conversation) {
@@ -35,7 +36,7 @@ export default defineEventHandler(async event => {
       })
     }
 
-    await db.delete(conversations).where(eq(conversations.id, conversationId))
+    await db.delete(conversations).where(eq(conversations.id, conversationId as string))
 
     return {
       success: true,

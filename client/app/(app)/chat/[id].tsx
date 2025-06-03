@@ -1,6 +1,12 @@
-import { View, Text, Button, TextInput, FlatList, ScrollView } from 'react-native'
+import { View, Text, Button, TextInput, FlatList, ScrollView, Alert } from 'react-native'
 import { useChat } from '@ai-sdk/react'
 import { fetch as expoFetch } from 'expo/fetch'
+import { useLocalSearchParams } from 'expo-router'
+import { ChatContext } from '../../../context/chat-context'
+import { useContext } from 'react'
+import { authClient } from '../../../utils/auth-client'
+import { useQueryClient } from '@tanstack/react-query'
+import { AuthContext } from '../../../context/auth-context'
 
 if (typeof globalThis.structuredClone === 'undefined') {
   globalThis.structuredClone = obj => {
@@ -8,11 +14,27 @@ if (typeof globalThis.structuredClone === 'undefined') {
   }
 }
 
-export default function Index() {
+export default function Chat() {
+  const { id } = useLocalSearchParams()
+  const { session } = useContext(AuthContext)
+  const { chats } = useContext(ChatContext)
+  const chat = chats.find(c => c.conversation.id === id)
+  const queryClient = useQueryClient()
+
   const { messages, input, handleSubmit, handleInputChange, status } = useChat({
     fetch: expoFetch as unknown as typeof globalThis.fetch,
     api: 'http://localhost:3000/api/ai',
     onError: error => console.error(error, 'ERROR'),
+    initialMessages: chat?.messages || [],
+    headers: {
+      Cookie: authClient.getCookie(),
+    },
+    body: {
+      conversationId: id,
+    },
+    onFinish: message => {
+      queryClient.invalidateQueries({ queryKey: ['chats', session?.user.id] })
+    },
   })
 
   return (
