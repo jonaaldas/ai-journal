@@ -4,6 +4,7 @@ import { SQLiteProvider, openDatabaseSync } from 'expo-sqlite'
 import { Slot, Stack } from 'expo-router'
 import { AuthProvider } from '../context/auth-context'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import '../assets/css/global.css'
 export const DATABASE_NAME = 'tasks'
 const queryClient = new QueryClient()
 

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -6,12 +6,18 @@ import { useContext } from 'react'
 import { ChatContext } from '../../context/chat-context'
 
 export default function Index() {
-  const { chats, handleNewChat } = useContext(ChatContext)
+  const { chats, handleNewChat, isLoading } = useContext(ChatContext)
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.chatList}>
-        {chats.length === 0 ? (
+        {isLoading ? (
+          <ActivityIndicator
+            size="large"
+            color="#0000ff"
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          />
+        ) : chats.length === 0 ? (
           <Text>No chats yet</Text>
         ) : (
           chats.map(chat => (

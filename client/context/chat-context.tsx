@@ -5,6 +5,7 @@ import type { UIMessage } from 'ai'
 import { useContext } from 'react'
 import { AuthContext } from './auth-context'
 import { router } from 'expo-router'
+
 type ChatWithMessages = {
   conversation: {
     id: string
@@ -16,15 +17,16 @@ type ChatWithMessages = {
   messages: UIMessage[]
 }
 
-export const ChatContext = createContext<{ chats: ChatWithMessages[]; handleNewChat: () => void }>({
+export const ChatContext = createContext<{ chats: ChatWithMessages[]; handleNewChat: () => void; isLoading: boolean }>({
   chats: [],
   handleNewChat: () => {},
+  isLoading: false,
 })
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useContext(AuthContext)
   const queryClient = useQueryClient()
-  const { data: chats } = useQuery({
+  const { data: chats, isLoading } = useQuery({
     queryKey: ['chats', session?.user.id],
     queryFn: () => fetch.get<{ success: boolean; chats: ChatWithMessages[] }>('/api/list'),
   })
@@ -39,5 +41,5 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     },
   })
 
-  return <ChatContext.Provider value={{ chats: chats?.chats || [], handleNewChat: handleNewChat.mutate }}>{children}</ChatContext.Provider>
+  return <ChatContext.Provider value={{ chats: chats?.chats || [], handleNewChat: handleNewChat.mutate, isLoading }}>{children}</ChatContext.Provider>
 }

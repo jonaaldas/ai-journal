@@ -3,7 +3,7 @@ import { useChat } from '@ai-sdk/react'
 import { fetch as expoFetch } from 'expo/fetch'
 import { useLocalSearchParams } from 'expo-router'
 import { ChatContext } from '../../../context/chat-context'
-import { useContext } from 'react'
+import { useContext, useRef, useEffect } from 'react'
 import { authClient } from '../../../utils/auth-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { AuthContext } from '../../../context/auth-context'
@@ -20,6 +20,7 @@ export default function Chat() {
   const { chats } = useContext(ChatContext)
   const chat = chats.find(c => c.conversation.id === id)
   const queryClient = useQueryClient()
+  const scrollViewRef = useRef<ScrollView>(null)
 
   const { messages, input, handleSubmit, handleInputChange, status } = useChat({
     fetch: expoFetch as unknown as typeof globalThis.fetch,
@@ -37,9 +38,16 @@ export default function Chat() {
     },
   })
 
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true })
+  }, [messages, status])
+
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <ScrollView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollViewRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 16 }}>
         {messages.map(m => (
           <View
             key={m.id}
@@ -53,14 +61,14 @@ export default function Chat() {
             <Text>{m.content}</Text>
           </View>
         ))}
-        {status === 'streaming' && (
+        {status === 'submitted' && (
           <View style={{ padding: 12, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
             <Text style={{ fontStyle: 'italic' }}>AI is thinking...</Text>
           </View>
         )}
       </ScrollView>
 
-      <View style={{ marginTop: 16 }}>
+      <View style={{ padding: 16, backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#ddd' }}>
         <TextInput
           style={{
             backgroundColor: 'white',

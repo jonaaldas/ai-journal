@@ -1,10 +1,11 @@
-import { Text, TouchableOpacity } from 'react-native'
-import { Redirect, Slot, Stack } from 'expo-router'
+import { Text } from 'react-native'
+import { Redirect, Stack } from 'expo-router'
 import { AuthContext } from '../../context/auth-context'
 import { useContext } from 'react'
 import { ChatProvider } from '../../context/chat-context'
+
 export default function AppLayout() {
-  const { isPending, refetch, session, error } = useContext(AuthContext)
+  const { isPending, session } = useContext(AuthContext)
 
   if (isPending) {
     return <Text>Loading...</Text>
