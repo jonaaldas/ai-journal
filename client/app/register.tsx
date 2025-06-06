@@ -2,6 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import React, { useState } from 'react'
 import { router } from 'expo-router'
 import { authClient } from '../utils/auth-client'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function Register() {
   const [email, setEmail] = useState('')
@@ -29,7 +30,7 @@ export default function Register() {
         password,
       })
 
-      router.push('(app)/index')
+      router.replace('/initial-setup')
     } catch (error) {
       console.error(error)
     }

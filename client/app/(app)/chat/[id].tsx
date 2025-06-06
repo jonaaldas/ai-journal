@@ -1,4 +1,4 @@
-import { View, Text, Button, TextInput, FlatList, ScrollView, Alert } from 'react-native'
+import { View, Text, TextInput, ScrollView, TouchableOpacity } from 'react-native'
 import { useChat } from '@ai-sdk/react'
 import { fetch as expoFetch } from 'expo/fetch'
 import { useLocalSearchParams } from 'expo-router'
@@ -7,6 +7,7 @@ import { useContext, useRef, useEffect } from 'react'
 import { authClient } from '../../../utils/auth-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { AuthContext } from '../../../context/auth-context'
+import { Ionicons } from '@expo/vector-icons'
 
 if (typeof globalThis.structuredClone === 'undefined') {
   globalThis.structuredClone = obj => {
@@ -17,12 +18,15 @@ if (typeof globalThis.structuredClone === 'undefined') {
 export default function Chat() {
   const { id } = useLocalSearchParams()
   const { session } = useContext(AuthContext)
-  const { chats } = useContext(ChatContext)
+  const { chats, tempToRealIdMap } = useContext(ChatContext)
   const chat = chats.find(c => c.conversation.id === id)
   const queryClient = useQueryClient()
   const scrollViewRef = useRef<ScrollView>(null)
+  const isTemporaryChat = typeof id === 'string' && id.startsWith('temp-')
 
-  const { messages, input, handleSubmit, handleInputChange, status } = useChat({
+  const conversationIdForAPI = typeof id === 'string' && tempToRealIdMap[id] ? tempToRealIdMap[id] : id
+
+  const { messages, input, handleSubmit, handleInputChange, status, data } = useChat({
     fetch: expoFetch as unknown as typeof globalThis.fetch,
     api: 'http://localhost:3000/api/ai',
     onError: error => console.error(error, 'ERROR'),
@@ -31,7 +35,7 @@ export default function Chat() {
       Cookie: authClient.getCookie(),
     },
     body: {
-      conversationId: id,
+      conversationId: conversationIdForAPI,
     },
     onFinish: message => {
       queryClient.invalidateQueries({ queryKey: ['chats', session?.user.id] })
@@ -39,68 +43,135 @@ export default function Chat() {
   })
 
   useEffect(() => {
+    if (data && Array.isArray(data)) {
+      data.forEach(item => {
+        if (typeof item === 'object' && item !== null) {
+          const dataItem = item as any
+          if (dataItem.type === 'conversation_created' && dataItem.tempId && dataItem.realId) {
+            const currentMap = queryClient.getQueryData<Record<string, string>>(['tempIdMap']) || {}
+            currentMap[dataItem.tempId] = dataItem.realId
+            queryClient.setQueryData(['tempIdMap'], currentMap)
+          }
+        }
+      })
+    }
+  }, [data, queryClient])
+
+  useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true })
   }, [messages, status])
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1 bg-gray-50">
       <ScrollView
         ref={scrollViewRef}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16 }}>
-        {messages.map(m => (
+        className="flex-1"
+        contentContainerStyle={{ padding: 16, paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}>
+        {messages.map((m, index) => (
           <View
-            key={m.id}
-            style={{
-              marginVertical: 8,
-              padding: 12,
-              backgroundColor: m.role === 'user' ? '#e3f2fd' : '#f5f5f5',
-              borderRadius: 8,
-            }}>
-            <Text style={{ fontWeight: 'bold', marginBottom: 4, textTransform: 'capitalize' }}>{m.role}</Text>
-            <Text>{m.content}</Text>
+            key={`${m.id}-${index}`}
+            className={`mb-4 ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+            <View className={`flex-row items-end max-w-[80%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+              <View className={`w-8 h-8 rounded-full ${m.role === 'user' ? 'bg-blue-600 ml-2' : 'bg-gray-400 mr-2'} items-center justify-center`}>
+                {m.role === 'user' ? (
+                  <Ionicons
+                    name="person"
+                    size={16}
+                    color="white"
+                  />
+                ) : (
+                  <Ionicons
+                    name="chatbubble"
+                    size={16}
+                    color="white"
+                  />
+                )}
+              </View>
+
+              <View className={`px-4 py-3 rounded-2xl ${m.role === 'user' ? 'bg-blue-600 rounded-br-md' : 'bg-white rounded-bl-md border border-gray-200'}`}>
+                <Text className={`text-base leading-5 ${m.role === 'user' ? 'text-white' : 'text-gray-900'}`}>{m.content}</Text>
+              </View>
+            </View>
           </View>
         ))}
+
         {status === 'submitted' && (
-          <View style={{ padding: 12, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
-            <Text style={{ fontStyle: 'italic' }}>AI is thinking...</Text>
+          <View className="items-start mb-4">
+            <View className="flex-row items-end max-w-[80%]">
+              <View className="w-8 h-8 rounded-full bg-gray-400 mr-2 items-center justify-center">
+                <Ionicons
+                  name="chatbubble"
+                  size={16}
+                  color="white"
+                />
+              </View>
+              <View className="px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-gray-200">
+                <View className="flex-row items-center">
+                  <View className="flex-row space-x-1 mr-2">
+                    <View className="w-2 h-2 bg-gray-400 rounded-full" />
+                    <View className="w-2 h-2 bg-gray-400 rounded-full" />
+                    <View className="w-2 h-2 bg-gray-400 rounded-full" />
+                  </View>
+                  <Text className="text-gray-500 text-sm italic">AI is thinking...</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {isTemporaryChat && messages.length === 0 && (
+          <View className="items-center justify-center py-20">
+            <View className="w-16 h-16 rounded-full bg-blue-100 items-center justify-center mb-4">
+              <Ionicons
+                name="chatbubble-outline"
+                size={24}
+                color="#2563eb"
+              />
+            </View>
+            <Text className="text-lg font-medium text-gray-600 mb-2">New Chat Ready!</Text>
+            <Text className="text-sm text-gray-500 text-center px-8">Start a conversation by typing your message below.</Text>
           </View>
         )}
       </ScrollView>
 
-      <View style={{ padding: 16, backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#ddd' }}>
-        <TextInput
-          style={{
-            backgroundColor: 'white',
-            padding: 12,
-            borderWidth: 1,
-            borderColor: '#ddd',
-            borderRadius: 8,
-            minHeight: 44,
-          }}
-          placeholder="Say something..."
-          value={input}
-          onChangeText={text => {
-            handleInputChange({ target: { value: text } } as any)
-          }}
-          onSubmitEditing={() => {
-            if (input.trim()) {
-              handleSubmit()
-            }
-          }}
-          multiline
-          returnKeyType="send"
-          blurOnSubmit={false}
-        />
-        <Button
-          title={status === 'streaming' ? 'Sending...' : 'Send'}
-          onPress={() => {
-            if (input.trim()) {
-              handleSubmit()
-            }
-          }}
-          disabled={status === 'streaming' || !input.trim()}
-        />
+      <View className="bg-white border-t border-gray-200 px-4 py-3">
+        <View className="flex-row flex gap-4">
+          <View className="flex-1 bg-gray-100 rounded-2xl px-4 py-2">
+            <TextInput
+              className="text-base text-gray-900 h-fit mb-4"
+              style={{ fontFamily: 'System' }}
+              placeholder="Type a message..."
+              value={input}
+              onChangeText={text => {
+                handleInputChange({ target: { value: text } } as any)
+              }}
+              onSubmitEditing={() => {
+                if (input.trim()) {
+                  handleSubmit()
+                }
+              }}
+              multiline
+              returnKeyType="send"
+              blurOnSubmit={false}
+            />
+          </View>
+
+          <TouchableOpacity
+            className={`w-10 h-10 rounded-full items-center justify-center ${status === 'streaming' || !input.trim() ? 'bg-gray-300' : 'bg-blue-600'}`}
+            onPress={() => {
+              if (input.trim()) {
+                handleSubmit()
+              }
+            }}
+            disabled={status === 'streaming' || !input.trim()}>
+            <Ionicons
+              name="send"
+              size={18}
+              color={status === 'streaming' || !input.trim() ? '#9CA3AF' : 'white'}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   )

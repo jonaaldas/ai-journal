@@ -13,7 +13,7 @@ export default function LoginScreen() {
         email,
         password,
       })
-      router.push('/(app)/index')
+      router.replace('/')
     } catch (error) {
       console.error(error)
     }

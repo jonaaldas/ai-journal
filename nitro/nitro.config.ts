@@ -4,4 +4,10 @@ export default defineNitroConfig({
   runtimeConfig: {
     openaiApiKey: process.env.OPENAI_API_KEY,
   },
+  devStorage: {
+    cache: {
+      driver: 'fs',
+      base: './storage/cache',
+    },
+  },
 })

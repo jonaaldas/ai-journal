@@ -2,9 +2,10 @@ import { appendClientMessage, createDataStreamResponse, streamText, customProvid
 import { createOpenAI, openai } from '@ai-sdk/openai'
 import { db } from '~~/db'
 import { eq } from 'drizzle-orm'
-import { stream } from '~~/db/schema'
+import { stream, conversations, user } from '~~/db/schema'
 import { messages as messagesTable } from '~~/db/schema'
 import defineAuthenticatedEventHandler from '../utils/auth-handler'
+import { createError } from 'h3'
 
 const languageModel = customProvider({
   languageModels: {
@@ -26,10 +27,48 @@ export default defineLazyEventHandler(async () => {
     const { messages, conversationId } = await readBody(event)
     const userId = event.context.user.id
     const conversationID = conversationId
-    const prevMessages = await db
-      .select()
-      .from(messagesTable)
-      .where(eq(messagesTable.conversationId, conversationID as string))
+
+    let actualConversationId = conversationID as string
+    let wasTemporary = false
+
+    if (conversationID.startsWith('temp-')) {
+      wasTemporary = true
+      const newConversation = await db
+        .insert(conversations)
+        .values({
+          id: crypto.randomUUID(),
+          title: 'New Chat',
+          userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning()
+        .get()
+
+      actualConversationId = newConversation.id
+    } else {
+      const existingConversation = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, conversationID as string))
+        .limit(1)
+
+      if (!existingConversation.length) {
+        throw createError({
+          statusCode: 404,
+          message: 'Conversation not found. Please create a new conversation first.',
+        })
+      }
+
+      if (existingConversation[0].userId !== userId) {
+        throw createError({
+          statusCode: 403,
+          message: 'You do not have permission to access this conversation.',
+        })
+      }
+    }
+
+    const prevMessages = await db.select().from(messagesTable).where(eq(messagesTable.conversationId, actualConversationId))
     const messageBody = messages[messages.length - 1]
     const messageId = crypto.randomUUID()
     const allMessages = appendClientMessage({
@@ -46,7 +85,7 @@ export default defineLazyEventHandler(async () => {
     })
     await db.insert(messagesTable).values({
       id: messageId as string,
-      conversationId: conversationID as string,
+      conversationId: actualConversationId,
       role: 'user',
       content: messageBody.content,
       createdAt: new Date(),
@@ -54,15 +93,24 @@ export default defineLazyEventHandler(async () => {
     const streamId = crypto.randomUUID()
     await db.insert(stream).values({
       id: streamId,
-      conversationId: conversationID,
+      conversationId: actualConversationId,
       createdAt: new Date(),
     })
+    const userBio = await db.select({ bio: user.bio }).from(user).where(eq(user.id, userId)).limit(1)
 
     const streamValue = createDataStreamResponse({
       execute: dataStream => {
+        if (wasTemporary) {
+          dataStream.writeData({
+            type: 'conversation_created',
+            tempId: conversationID,
+            realId: actualConversationId,
+          })
+        }
+
         const result = streamText({
           model: languageModel.languageModel('chat-model'),
-          system: 'You are a helpful assistant.',
+          system: `You are my therapist, journal, and friend. I write to you and you never judge me. All you do is listen and help me go through this fucked up life. This is who I am: ${userBio[0].bio}`,
           messages: allMessages,
           maxSteps: 5,
           experimental_transform: smoothStream({ chunking: 'word' }),
@@ -77,7 +125,7 @@ export default defineLazyEventHandler(async () => {
 
                 await db.insert(messagesTable).values({
                   id: crypto.randomUUID() as string,
-                  conversationId: conversationID as string,
+                  conversationId: actualConversationId,
                   role: assistantMessage.role as 'assistant',
                   content: assistantMessage.content,
                   parts: assistantMessage.parts ? JSON.stringify(assistantMessage.parts) : null,

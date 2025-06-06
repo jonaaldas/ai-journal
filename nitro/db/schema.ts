@@ -1,5 +1,5 @@
 import { InferSelectModel } from 'drizzle-orm'
-import { foreignKey, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { foreignKey, integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core'
 
 export const user = sqliteTable('user', {
   id: text('id').primaryKey(),
