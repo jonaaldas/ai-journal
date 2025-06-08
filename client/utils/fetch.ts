@@ -1,8 +1,8 @@
 import { ofetch } from 'ofetch'
 import { authClient } from './auth-client'
-
+const baseURL = process.env.NODE_ENV === 'production' ? 'https://ai-journal-klby.onrender.com/' : 'http://localhost:3000'
 const api = ofetch.create({
-  baseURL: 'http://localhost:3000',
+  baseURL,
   credentials: 'include',
   onRequest({ options }) {
     const headers = new Headers(options.headers)
