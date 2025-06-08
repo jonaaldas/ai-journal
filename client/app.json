@@ -39,6 +39,14 @@
         {
           "launchMode": "most-recent"
         }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.ai-journal",
+          "enableGooglePay": true,
+          "publishableKey": "pk_test_51RSLCpPW6ilRA0XQz5ObeujQ6wGZpV8vBfcBsBfyHJtPCdRW137JKsyY65qW7ijDpGSOSa7LnLqOveBtTznlSnEt00DbASqpk_test_51RSLCpPW6ilRA0XQlg7zGAsKkXIeQwOZJquqhj9HIB6XyZ1Nww31rN31LfPyV2NULJ3xSx3qWrX5vCzVcsANYVfs00d1FQWH8Dpk_test_51RSLCpPW6ilRA0XQlg7zGAsKkXIeQwOZJquqhj9HIB6XyZ1Nww31rN31LfPyV2NULJ3xSx3qWrX5vCzVcsANYVfs00d1FQWH8D"
+        }
       ]
     ],
     "extra": {

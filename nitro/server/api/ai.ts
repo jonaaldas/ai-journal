@@ -6,6 +6,16 @@ import { stream, conversations, user } from '~~/db/schema'
 import { messages as messagesTable } from '~~/db/schema'
 import defineAuthenticatedEventHandler from '../utils/auth-handler'
 import { createError } from 'h3'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+const redis = new Redis({
+  url: 'https://learning-mite-34773.upstash.io',
+  token: 'AYfVAAIjcDE5NGNjZDBjNGQ5MzQ0NTRlYjg4Y2UxYjU5YWNiNDdjMnAxMA',
+})
+const ratelimit = new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.fixedWindow(5, '30s'),
+})
 
 const languageModel = customProvider({
   languageModels: {
@@ -24,6 +34,18 @@ const languageModel = customProvider({
 
 export default defineLazyEventHandler(async () => {
   return defineAuthenticatedEventHandler(async event => {
+    // call ratelimit with request ip
+    const ip = getRequestIP(event)
+    const { success, remaining } = await ratelimit.limit(ip)
+
+    if (!success) {
+      throw createError({
+        statusCode: 429,
+        message: 'Rate limit exceeded',
+      })
+    }
+
+    console.log('remaining', remaining)
     const { messages, conversationId } = await readBody(event)
     const userId = event.context.user.id
     const conversationID = conversationId

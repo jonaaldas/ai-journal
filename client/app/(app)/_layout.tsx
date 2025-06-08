@@ -43,12 +43,25 @@ export default function AppLayout() {
           }}
         />
         <Stack.Screen
-          name="settings"
-          options={{ headerShown: true, title: 'Settings' }}
+          name="settings/index"
+          options={{
+            headerShown: true,
+            title: 'Settings',
+            headerRight: () => (
+              <Button
+                title="Close"
+                onPress={() => router.push('/initial-setup')}
+              />
+            ),
+          }}
         />
         <Stack.Screen
-          name="/initial-setup"
-          options={{ headerShown: false, presentation: 'modal' }}
+          name="settings/subscription"
+          options={{ headerShown: true, title: 'Subscription' }}
+        />
+        <Stack.Screen
+          name="initial-setup"
+          options={{ headerShown: false }}
         />
       </Stack>
     </ChatProvider>

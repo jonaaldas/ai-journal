@@ -25,6 +25,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="ai-journal"/>
+        <data android:scheme="exp+chat-app"/>
       </intent-filter>
     </activity>
   </application>

@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import '../assets/css/global.css'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import ExpoStripeProvider from '../components/expo-stripe-provider'
 export const DATABASE_NAME = 'tasks'
 const queryClient = new QueryClient()
 
@@ -18,16 +19,18 @@ export default function RootLayout() {
       <GluestackUIProvider mode="light">
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <Suspense fallback={<ActivityIndicator size="large" />}>
-              <SQLiteProvider
-                databaseName={DATABASE_NAME}
-                options={{ enableChangeListener: true }}
-                useSuspense>
-                <GestureHandlerRootView>
-                  <Slot />
-                </GestureHandlerRootView>
-              </SQLiteProvider>
-            </Suspense>
+            <ExpoStripeProvider>
+              <Suspense fallback={<ActivityIndicator size="large" />}>
+                <SQLiteProvider
+                  databaseName={DATABASE_NAME}
+                  options={{ enableChangeListener: true }}
+                  useSuspense>
+                  <GestureHandlerRootView>
+                    <Slot />
+                  </GestureHandlerRootView>
+                </SQLiteProvider>
+              </Suspense>
+            </ExpoStripeProvider>
           </AuthProvider>
         </QueryClientProvider>
       </GluestackUIProvider>

@@ -1,11 +1,11 @@
-import { authClient } from '../../utils/auth-client'
+import { authClient } from '../../../utils/auth-client'
 import { Ionicons } from '@expo/vector-icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import React, { useContext, useEffect, useState } from 'react'
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { AuthContext } from '../../context/auth-context'
-import fetch from '../../utils/fetch'
+import { AuthContext } from '../../../context/auth-context'
+import fetch from '../../../utils/fetch'
 
 type BioInfo = {
   id: string
@@ -20,17 +20,10 @@ type BioInfo = {
   stripeCustomerId: string
 }
 
-export default function ProfileScreen() {
+export default function SettingsScreen() {
   const [bio, setBio] = useState<string>('')
   const { isPending, session } = useContext(AuthContext)
   const queryClient = useQueryClient()
-
-  const { data: subscription } = useQuery<{ status: string; currentPeriodEnd: number }>({
-    queryKey: ['stripe', 'subscription', session?.user?.id],
-    queryFn: () => {
-      return fetch.get('/api/stripe/subscription')
-    },
-  })
 
   const { mutate: updateBio } = useMutation({
     mutationFn: () => fetch.post('/api/bio', { bio }),
@@ -103,8 +96,14 @@ export default function ProfileScreen() {
           <View className="bg-white rounded-2xl shadow-sm overflow-hidden p-4 flex flex-col gap-4">
             <TouchableOpacity
               onPress={() => updateBio()}
-              className="w-full bg-blue-500 py-4 rounded-xl items-center">
+              className="w-full bg-blue-500 py-4 rounded-xl items-center"
+              disabled={isPending}>
               <Text className="text-white font-medium">Save Bio</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/settings/subscription')}
+              className="w-full bg-green-500 py-4 rounded-xl items-center">
+              <Text className="text-white font-medium">Subscription</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="w-full bg-red-500 py-4 rounded-xl items-center"

@@ -3,11 +3,20 @@ export default defineNitroConfig({
   srcDir: 'server',
   runtimeConfig: {
     openaiApiKey: process.env.OPENAI_API_KEY,
+    upstashRedisRestUrl: process.env.UPSTASH_REDIS_REST_URL,
+    upstashRedisRestToken: process.env.UPSTASH_REDIS_REST_TOKEN,
   },
   devStorage: {
     cache: {
       driver: 'fs',
-      base: './storage/cache',
+      base: './cache',
+    },
+  },
+  storage: {
+    cache: {
+      driver: 'redis',
+      url: useRuntimeConfig().upstashRedisRestUrl,
+      token: useRuntimeConfig().upstashRedisRestToken,
     },
   },
 })

@@ -5,7 +5,7 @@ import { customSession } from 'better-auth/plugins'
 import { eq } from 'drizzle-orm'
 import { db } from '~~/db'
 import * as schema from '~~/db/schema'
-// import { stripe } from './stripe'
+import { stripe } from './stripe'
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'sqlite',
@@ -16,26 +16,26 @@ export const auth = betterAuth({
   databaseHooks: {
     account: {
       create: {
-        // before: async (account, context) => {
-        //   try {
-        //     const customer = await stripe.customers.create({
-        //       email: context.body.email,
-        //       metadata: {
-        //         id: account.id,
-        //       },
-        //     })
-        //     await useStorage('cache').setItem(`stripe:customer:${account.userId}`, customer)
-        //     await db
-        //       .update(schema.user)
-        //       .set({
-        //         stripeCustomerId: customer.id,
-        //       })
-        //       .where(eq(schema.user.id, account.userId))
-        //     return true
-        //   } catch (error) {
-        //     throw new Error(`Failed to create Stripe customer: ${error.message}`)
-        //   }
-        // },
+        before: async (account, context) => {
+          try {
+            const customer = await stripe.customers.create({
+              email: context.body.email,
+              metadata: {
+                id: account.id,
+              },
+            })
+            await useStorage('cache').setItem(`stripe:customer:${account.userId}`, customer)
+            await db
+              .update(schema.user)
+              .set({
+                stripeCustomerId: customer.id,
+              })
+              .where(eq(schema.user.id, account.userId))
+            return true
+          } catch (error) {
+            throw new Error(`Failed to create Stripe customer: ${error.message}`)
+          }
+        },
       },
     },
   },
