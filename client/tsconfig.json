@@ -5,7 +5,15 @@
     "moduleResolution": "NodeNext",
     "target": "ESNext",
     "esModuleInterop": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "tailwind.config": [
+        "./tailwind.config.js"
+      ]
+    }
   },
   "ts-node": {
     "esm": true

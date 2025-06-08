@@ -1,5 +1,6 @@
 module.exports = function (api) {
   api.cache(true)
+  api.cache(true)
   return {
     presets: [
       [
@@ -22,6 +23,7 @@ module.exports = function (api) {
           },
         },
       ],
+      'react-native-reanimated/plugin',
     ],
   }
 }

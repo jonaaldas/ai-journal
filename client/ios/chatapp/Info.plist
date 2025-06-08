@@ -27,6 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>ai-journal</string>
           <string>com.jonaaldas.chat-app</string>
         </array>
       </dict>
