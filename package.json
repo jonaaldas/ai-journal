@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd nitro && pnpm run dev",
-    "client": "cd client && pnpm run dev"
+    "client": "cd client && pnpm run dev",
+    "build:server": "cd nitro && pnpm run build",
+    "run:server": "cd nitro && pnpm run preview && cd..",
+    "build:client": "cd client && pnpm run build",
+    "build": "pnpm run build:server && pnpm run build:client"
   },
   "keywords": [],
   "author": "",
