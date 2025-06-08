@@ -8,6 +8,7 @@ import { AuthProvider } from '../context/auth-context'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import '../assets/css/global.css'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 export const DATABASE_NAME = 'tasks'
 const queryClient = new QueryClient()
 
@@ -22,7 +23,9 @@ export default function RootLayout() {
                 databaseName={DATABASE_NAME}
                 options={{ enableChangeListener: true }}
                 useSuspense>
-                <Slot />
+                <GestureHandlerRootView>
+                  <Slot />
+                </GestureHandlerRootView>
               </SQLiteProvider>
             </Suspense>
           </AuthProvider>

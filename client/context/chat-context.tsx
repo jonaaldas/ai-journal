@@ -22,11 +22,13 @@ export const ChatContext = createContext<{
   handleNewChat: () => void
   isLoading: boolean
   tempToRealIdMap: Record<string, string>
+  handleDeleteChat: (chatId: string) => void
 }>({
   chats: [],
   handleNewChat: () => {},
   isLoading: false,
   tempToRealIdMap: {},
+  handleDeleteChat: () => {},
 })
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
@@ -37,7 +39,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     queryFn: () => fetch.get<{ success: boolean; chats: ChatWithMessages[] }>('/api/list'),
   })
 
-  // Store mapping of temp IDs to real IDs
   const tempToRealIdMap = queryClient.getQueryData<Record<string, string>>(['tempIdMap']) || {}
 
   const handleNewChat = useMutation({
@@ -99,6 +100,27 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     },
   })
 
+  const handleDeleteChat = useMutation({
+    mutationFn: (chatId: string) => fetch.delete(`/api/delete?id=${chatId}`),
+    onMutate: async chatId => {
+      await queryClient.cancelQueries({ queryKey: ['chats', session?.user.id] })
+
+      const previousChats = queryClient.getQueryData<{ success: boolean; chats: ChatWithMessages[] }>(['chats', session?.user.id])
+
+      queryClient.setQueryData<{ success: boolean; chats: ChatWithMessages[] }>(['chats', session?.user.id], old => ({
+        success: true,
+        chats: old?.chats.filter(chat => chat.conversation.id !== chatId) || [],
+      }))
+
+      return { previousChats }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousChats) {
+        queryClient.setQueryData(['chats', session?.user.id], context.previousChats)
+      }
+    },
+  })
+
   return (
     <ChatContext.Provider
       value={{
@@ -106,6 +128,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         handleNewChat: handleNewChat.mutate,
         isLoading,
         tempToRealIdMap,
+        handleDeleteChat: handleDeleteChat.mutate,
       }}>
       {children}
     </ChatContext.Provider>
