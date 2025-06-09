@@ -34,6 +34,7 @@ const languageModel = customProvider({
 
 export default defineLazyEventHandler(async () => {
   return defineAuthenticatedEventHandler(async event => {
+    console.log('running')
     // call ratelimit with request ip
     const ip = getRequestIP(event)
     const { success, remaining } = await ratelimit.limit(ip)
