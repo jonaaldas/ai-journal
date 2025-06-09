@@ -61,129 +61,128 @@ export default function Chat() {
   }, [messages, status])
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAwareScrollView
-        className="flex-1"
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
-        <View className="flex-1">
-          <ScrollView
-            ref={scrollViewRef}
-            className="flex-1"
-            contentContainerStyle={{
-              padding: 16,
-              paddingBottom: 20,
-              flexGrow: 1,
-              justifyContent: messages.length === 0 && !isTemporaryChat ? 'flex-end' : 'flex-start',
-            }}
-            showsVerticalScrollIndicator={false}>
-            {messages.map((m, index) => (
-              <View
-                key={`${m.id}-${index}`}
-                className={`mb-4 ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <View className={`flex-row items-end max-w-[80%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <View className={`w-8 h-8 rounded-full ${m.role === 'user' ? 'bg-blue-600 ml-2' : 'bg-gray-400 mr-2'} items-center justify-center`}>
-                    {m.role === 'user' ? (
-                      <Ionicons
-                        name="person"
-                        size={16}
-                        color="white"
-                      />
-                    ) : (
-                      <Ionicons
-                        name="chatbubble"
-                        size={16}
-                        color="white"
-                      />
-                    )}
-                  </View>
-
-                  <View className={`px-4 py-3 rounded-2xl ${m.role === 'user' ? 'bg-blue-600 rounded-br-md' : 'bg-white rounded-bl-md border border-gray-200'}`}>
-                    <Text className={`text-base leading-5 ${m.role === 'user' ? 'text-white' : 'text-gray-900'}`}>{m.content}</Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-
-            {status === 'submitted' && (
-              <View className="items-start mb-4">
-                <View className="flex-row items-end max-w-[80%]">
-                  <View className="w-8 h-8 rounded-full bg-gray-400 mr-2 items-center justify-center">
+    <KeyboardAwareScrollView
+      className="flex-1"
+      contentContainerStyle={{ flexGrow: 1, marginBottom: 0 }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      scrollEnabled={false}>
+      <View className="flex-1">
+        <ScrollView
+          ref={scrollViewRef}
+          className="flex-1"
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: 20,
+            flexGrow: 1,
+            justifyContent: messages.length === 0 && !isTemporaryChat ? 'flex-end' : 'flex-start',
+          }}
+          showsVerticalScrollIndicator={false}>
+          {messages.map((m, index) => (
+            <View
+              key={`${m.id}-${index}`}
+              className={`mb-4 ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+              <View className={`flex-row items-end max-w-[80%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                <View className={`w-8 h-8 rounded-full ${m.role === 'user' ? 'bg-blue-600 ml-2' : 'bg-gray-400 mr-2'} items-center justify-center`}>
+                  {m.role === 'user' ? (
+                    <Ionicons
+                      name="person"
+                      size={16}
+                      color="white"
+                    />
+                  ) : (
                     <Ionicons
                       name="chatbubble"
                       size={16}
                       color="white"
                     />
-                  </View>
-                  <View className="px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-gray-200">
-                    <View className="flex-row items-center">
-                      <View className="flex-row space-x-1 mr-2">
-                        <View className="w-2 h-2 bg-gray-400 rounded-full" />
-                        <View className="w-2 h-2 bg-gray-400 rounded-full" />
-                        <View className="w-2 h-2 bg-gray-400 rounded-full" />
-                      </View>
-                      <Text className="text-gray-500 text-sm italic">AI is thinking...</Text>
-                    </View>
-                  </View>
+                  )}
+                </View>
+
+                <View className={`px-4 py-3 rounded-2xl ${m.role === 'user' ? 'bg-blue-600 rounded-br-md' : 'bg-white rounded-bl-md border border-gray-200'}`}>
+                  <Text className={`text-base leading-5 ${m.role === 'user' ? 'text-white' : 'text-gray-900'}`}>{m.content}</Text>
                 </View>
               </View>
-            )}
+            </View>
+          ))}
 
-            {isTemporaryChat && messages.length === 0 && (
-              <View className="items-center justify-center py-20">
-                <View className="w-16 h-16 rounded-full bg-blue-100 items-center justify-center mb-4">
+          {status === 'submitted' && (
+            <View className="items-start mb-4">
+              <View className="flex-row items-end max-w-[80%]">
+                <View className="w-8 h-8 rounded-full bg-gray-400 mr-2 items-center justify-center">
                   <Ionicons
-                    name="chatbubble-outline"
-                    size={24}
-                    color="#2563eb"
+                    name="chatbubble"
+                    size={16}
+                    color="white"
                   />
                 </View>
-                <Text className="text-lg font-medium text-gray-600 mb-2">New Chat Ready!</Text>
-                <Text className="text-sm text-gray-500 text-center px-8">Start a conversation by typing your message below.</Text>
+                <View className="px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-gray-200">
+                  <View className="flex-row items-center">
+                    <View className="flex-row space-x-1 mr-2">
+                      <View className="w-2 h-2 bg-gray-400 rounded-full" />
+                      <View className="w-2 h-2 bg-gray-400 rounded-full" />
+                      <View className="w-2 h-2 bg-gray-400 rounded-full" />
+                    </View>
+                    <Text className="text-gray-500 text-sm italic">AI is thinking...</Text>
+                  </View>
+                </View>
               </View>
-            )}
-          </ScrollView>
+            </View>
+          )}
 
-          <View className="w-full bg-gray-50 border-t border-gray-200 px-4 py-2 flex flex-row justify-between gap-4">
-            <View className="w-full mb-2 flex-1 bg-white border border-gray-300 rounded-3xl shadow-sm overflow-hidden">
-              <AutoGrowTextInput
-                className="bg-transparent px-4 py-3 text-base leading-6"
-                placeholderTextColor="#8E8E93"
-                placeholder="Type a message..."
-                returnKeyType="default"
-                blurOnSubmit={false}
-                value={input}
-                onChangeText={text => {
-                  handleInputChange({ target: { value: text } } as any)
-                }}
-                minHeight={48}
-                maxHeight={120}
-                style={{
-                  textAlignVertical: 'top',
-                }}
-              />
-            </View>
-            <View className="flex-row items-end justify-end">
-              <TouchableOpacity
-                className={`w-8 h-8 rounded-full items-center justify-center ${status === 'streaming' || !input.trim() ? 'bg-gray-200' : 'bg-blue-500'}`}
-                onPress={() => {
-                  if (input.trim()) {
-                    handleSubmit()
-                  }
-                }}
-                disabled={status === 'streaming' || !input.trim()}
-                activeOpacity={0.7}>
+          {isTemporaryChat && messages.length === 0 && (
+            <View className="items-center justify-center py-20">
+              <View className="w-16 h-16 rounded-full bg-blue-100 items-center justify-center mb-4">
                 <Ionicons
-                  name="arrow-up"
-                  size={16}
-                  color={status === 'streaming' || !input.trim() ? '#9CA3AF' : 'white'}
+                  name="chatbubble-outline"
+                  size={24}
+                  color="#2563eb"
                 />
-              </TouchableOpacity>
+              </View>
+              <Text className="text-lg font-medium text-gray-600 mb-2">New Chat Ready!</Text>
+              <Text className="text-sm text-gray-500 text-center px-8">Start a conversation by typing your message below.</Text>
             </View>
+          )}
+        </ScrollView>
+
+        <View className="w-full bg-gray-50 border-t border-gray-200 px-4 py-2 flex flex-row justify-between items-start gap-4">
+          <View className="mb-2 flex-1 bg-white border border-gray-300 rounded-3xl shadow-sm overflow-hidden w-2/3">
+            <AutoGrowTextInput
+              className="bg-transparent px-4 py-3 text-base leading-6"
+              placeholderTextColor="#8E8E93"
+              placeholder="Type a message..."
+              returnKeyType="default"
+              blurOnSubmit={false}
+              value={input}
+              onChangeText={text => {
+                handleInputChange({ target: { value: text } } as any)
+              }}
+              minHeight={48}
+              maxHeight={120}
+              style={{
+                textAlignVertical: 'top',
+              }}
+            />
+          </View>
+          <View className="flex-row items-center justify-end w-[1/3] h-full">
+            <TouchableOpacity
+              className={`w-8 h-8 rounded-full items-center justify-center ${status === 'streaming' || !input.trim() ? 'bg-gray-200' : 'bg-blue-500'}`}
+              onPress={() => {
+                if (input.trim()) {
+                  handleSubmit()
+                }
+              }}
+              disabled={status === 'streaming' || !input.trim()}
+              activeOpacity={0.7}>
+              <Ionicons
+                name="arrow-up"
+                size={16}
+                color={status === 'streaming' || !input.trim() ? '#9CA3AF' : 'white'}
+              />
+            </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+      </View>
+    </KeyboardAwareScrollView>
   )
 }

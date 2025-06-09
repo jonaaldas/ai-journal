@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import React, { useContext, useEffect, useState } from 'react'
-import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { AuthContext } from '../../../context/auth-context'
 import fetch from '../../../utils/fetch'
 
@@ -23,12 +23,22 @@ type BioInfo = {
 export default function SettingsScreen() {
   const [bio, setBio] = useState<string>('')
   const { isPending, session } = useContext(AuthContext)
+  const [isUpdating, setIsUpdating] = useState(false)
   const queryClient = useQueryClient()
 
   const { mutate: updateBio } = useMutation({
     mutationFn: () => fetch.post('/api/bio', { bio }),
+    onMutate: () => {
+      setIsUpdating(true)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', session?.user?.id] })
+      Alert.alert('Bio updated successfully')
+      setIsUpdating(false)
+    },
+    onError: () => {
+      Alert.alert('Failed to update bio')
+      setIsUpdating(false)
     },
   })
 
@@ -98,7 +108,14 @@ export default function SettingsScreen() {
               onPress={() => updateBio()}
               className="w-full bg-blue-500 py-4 rounded-xl items-center"
               disabled={isPending}>
-              <Text className="text-white font-medium">Save Bio</Text>
+              {!isUpdating ? (
+                <Text className="text-white font-medium">Save Bio</Text>
+              ) : (
+                <ActivityIndicator
+                  size="small"
+                  color="#fff"
+                />
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/settings/subscription')}
