@@ -9,14 +9,14 @@ import { createError } from 'h3'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { v4 as uuidv4 } from 'uuid'
-const redis = new Redis({
-  url: 'https://learning-mite-34773.upstash.io',
-  token: 'AYfVAAIjcDE5NGNjZDBjNGQ5MzQ0NTRlYjg4Y2UxYjU5YWNiNDdjMnAxMA',
-})
-const ratelimit = new Ratelimit({
-  redis: redis,
-  limiter: Ratelimit.fixedWindow(5, '30s'),
-})
+// const redis = new Redis({
+//   url: 'https://learning-mite-34773.upstash.io',
+//   token: 'AYfVAAIjcDE5NGNjZDBjNGQ5MzQ0NTRlYjg4Y2UxYjU5YWNiNDdjMnAxMA',
+// })
+// const ratelimit = new Ratelimit({
+//   redis: redis,
+//   limiter: Ratelimit.fixedWindow(5, '30s'),
+// })
 
 const languageModel = customProvider({
   languageModels: {
@@ -37,17 +37,17 @@ export default defineLazyEventHandler(async () => {
   return defineAuthenticatedEventHandler(async event => {
     console.log('running')
     // call ratelimit with request ip
-    const ip = getRequestIP(event)
-    const { success, remaining } = await ratelimit.limit(ip)
+    // const ip = getRequestIP(event)
+    // const { success, remaining } = await ratelimit.limit(ip)
 
-    if (!success) {
-      throw createError({
-        statusCode: 429,
-        message: 'Rate limit exceeded',
-      })
-    }
+    // if (!success) {
+    //   throw createError({
+    //     statusCode: 429,
+    //     message: 'Rate limit exceeded',
+    //   })
+    // }
 
-    console.log('remaining', remaining)
+    // console.log('remaining', remaining)
     const { messages, conversationId } = await readBody(event)
     const userId = event.context.user.id
     const conversationID = conversationId
