@@ -5,4 +5,8 @@ const { wrapWithReanimatedMetroConfig } = require('react-native-reanimated/metro
 const config = getDefaultConfig(__dirname)
 config.resolver.unstable_enablePackageExports = false
 config.resolver.sourceExts.push('sql')
+
+config.resolver.platforms = ['ios', 'android', 'native']
+
 module.exports = wrapWithReanimatedMetroConfig(withNativeWind(config, { input: './assets/css/global.css' }))
+

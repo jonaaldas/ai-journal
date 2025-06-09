@@ -2,8 +2,10 @@ import { expoClient } from '@better-auth/expo/client'
 import { createAuthClient } from 'better-auth/react'
 import * as SecureStore from 'expo-secure-store'
 
+const apiUrl = process.env.API_URL || (process.env.NODE_ENV === 'production' ? 'https://ai-journal-klby.onrender.com' : 'http://localhost:3000')
+
 export const authClient = createAuthClient({
-  baseURL: 'http://localhost:3000',
+  baseURL: apiUrl,
   plugins: [
     expoClient({
       scheme: 'ai-journal',

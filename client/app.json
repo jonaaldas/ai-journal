@@ -15,7 +15,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jonaaldas.chat-app"
+      "bundleIdentifier": "com.jonaaldas.chat-app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,11 +25,6 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.jonaaldas.chatapp"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "output": "server",
-      "bundler": "metro"
     },
     "plugins": [
       "expo-sqlite",
