@@ -8,6 +8,7 @@ import defineAuthenticatedEventHandler from '../utils/auth-handler'
 import { createError } from 'h3'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import { v4 as uuidv4 } from 'uuid'
 const redis = new Redis({
   url: 'https://learning-mite-34773.upstash.io',
   token: 'AYfVAAIjcDE5NGNjZDBjNGQ5MzQ0NTRlYjg4Y2UxYjU5YWNiNDdjMnAxMA',
@@ -59,7 +60,7 @@ export default defineLazyEventHandler(async () => {
       const newConversation = await db
         .insert(conversations)
         .values({
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           title: 'New Chat',
           userId,
           createdAt: new Date(),
@@ -93,7 +94,7 @@ export default defineLazyEventHandler(async () => {
 
     const prevMessages = await db.select().from(messagesTable).where(eq(messagesTable.conversationId, actualConversationId))
     const messageBody = messages[messages.length - 1]
-    const messageId = crypto.randomUUID()
+    const messageId = uuidv4()
     const allMessages = appendClientMessage({
       messages: prevMessages.map(msg => ({
         id: msg.id,
@@ -113,7 +114,7 @@ export default defineLazyEventHandler(async () => {
       content: messageBody.content,
       createdAt: new Date(),
     })
-    const streamId = crypto.randomUUID()
+    const streamId = uuidv4()
     await db.insert(stream).values({
       id: streamId,
       conversationId: actualConversationId,
@@ -137,7 +138,7 @@ export default defineLazyEventHandler(async () => {
           messages: allMessages,
           maxSteps: 5,
           experimental_transform: smoothStream({ chunking: 'word' }),
-          experimental_generateMessageId: () => crypto.randomUUID(),
+          experimental_generateMessageId: () => uuidv4(),
           onFinish: async ({ response }) => {
             if (userId) {
               try {
@@ -147,7 +148,7 @@ export default defineLazyEventHandler(async () => {
                 })
 
                 await db.insert(messagesTable).values({
-                  id: crypto.randomUUID() as string,
+                  id: uuidv4() as string,
                   conversationId: actualConversationId,
                   role: assistantMessage.role as 'assistant',
                   content: assistantMessage.content,

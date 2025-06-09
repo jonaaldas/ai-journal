@@ -38,6 +38,9 @@ importers:
       stripe:
         specifier: ^18.2.1
         version: 18.2.1(@types/node@22.15.29)
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       zod:
         specifier: ^3.25.46
         version: 3.25.46
