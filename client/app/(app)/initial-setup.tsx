@@ -16,7 +16,8 @@ export default function InitialSetup() {
 
   const checkSubscription = async () => {
     try {
-      const hasActiveSubscription = await fetch.post<{ status: string }>('/api/stripe/check-subscription')
+      const hasActiveSubscriptionResponse = await fetch.post('/api/stripe/check-subscription')
+      const hasActiveSubscription = await hasActiveSubscriptionResponse.json()
       if (hasActiveSubscription) {
         setCurrentStep('bio')
       }

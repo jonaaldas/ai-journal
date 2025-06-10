@@ -36,13 +36,19 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient()
   const { data: chats, isLoading } = useQuery({
     queryKey: ['chats', session?.user.id],
-    queryFn: () => fetch.get<{ success: boolean; chats: ChatWithMessages[] }>('/api/list'),
+    queryFn: async () => {
+      const response = await fetch.get('/api/list')
+      return response.json()
+    },
   })
 
   const tempToRealIdMap = queryClient.getQueryData<Record<string, string>>(['tempIdMap']) || {}
 
   const handleNewChat = useMutation({
-    mutationFn: () => fetch.post<{ success: boolean; chat: { id: string; title: string; userId: string; createdAt: Date; updatedAt: Date } }>('/api/new'),
+    mutationFn: async () => {
+      const response = await fetch.post('/api/new')
+      return response.json()
+    },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ['chats', session?.user.id] })
 
@@ -101,7 +107,10 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   })
 
   const handleDeleteChat = useMutation({
-    mutationFn: (chatId: string) => fetch.delete(`/api/delete?id=${chatId}`),
+    mutationFn: async (chatId: string) => {
+      const response = await fetch.delete(`/api/delete?id=${chatId}`)
+      return response.json()
+    },
     onMutate: async chatId => {
       await queryClient.cancelQueries({ queryKey: ['chats', session?.user.id] })
 

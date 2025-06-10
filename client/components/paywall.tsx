@@ -26,18 +26,20 @@ export default function PaywallModal({ onSubscriptionComplete, hideClose }: Payw
     async (period: 'monthly' | 'yearly') => {
       try {
         setLoading(true)
-        const hasActiveSubscription = await fetch.post<{ status: string }>('/api/stripe/check-subscription')
+        const hasActiveSubscriptionResponse = await fetch.post('/api/stripe/check-subscription')
+        const hasActiveSubscription = await hasActiveSubscriptionResponse.json()
         if (hasActiveSubscription) {
           alert('You already have an active subscription.')
           onSubscriptionComplete?.()
           return
         }
-        const res = await fetch.post<{ customer: string; ephemeralKey: string; setupIntentClientSecret: string; clientSecret: string; hasTrial: boolean }>('/api/stripe/sheet', { period })
+        const res = await fetch.post('/api/stripe/sheet', { period })
+        const resJson = await res.json()
 
         const initConfig = {
           merchantDisplayName: 'AI Journal',
-          customerId: res.customer,
-          customerEphemeralKeySecret: res.ephemeralKey,
+          customerId: resJson.customer,
+          customerEphemeralKeySecret: resJson.ephemeralKey,
           allowsDelayedPaymentMethods: true,
           paymentMethodOrder: ['card', 'applePay', 'googlePay'],
           defaultBillingDetails: {
@@ -47,10 +49,10 @@ export default function PaywallModal({ onSubscriptionComplete, hideClose }: Payw
           returnURL: Linking.createURL('stripe-redirect'),
         }
 
-        if (res.hasTrial) {
+        if (resJson.hasTrial) {
           const { error: initError } = await initPaymentSheet({
             ...initConfig,
-            setupIntentClientSecret: res.setupIntentClientSecret,
+            setupIntentClientSecret: resJson.setupIntentClientSecret,
           })
           console.log('initError 1', initError)
           if (initError) {
@@ -61,7 +63,7 @@ export default function PaywallModal({ onSubscriptionComplete, hideClose }: Payw
         } else {
           const { error: initError } = await initPaymentSheet({
             ...initConfig,
-            paymentIntentClientSecret: res.clientSecret,
+            paymentIntentClientSecret: resJson.clientSecret,
           })
           console.log('initError', initError)
           if (initError) {

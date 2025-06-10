@@ -27,7 +27,10 @@ export default function SettingsScreen() {
   const queryClient = useQueryClient()
 
   const { mutate: updateBio } = useMutation({
-    mutationFn: () => fetch.post('/api/bio', { bio }),
+    mutationFn: async () => {
+      const response = await fetch.post('/api/bio', { bio })
+      return response.json()
+    },
     onMutate: () => {
       setIsUpdating(true)
     },
@@ -44,8 +47,9 @@ export default function SettingsScreen() {
 
   const { data: userInfo } = useQuery<BioInfo>({
     queryKey: ['user', session?.user?.id],
-    queryFn: () => {
-      return fetch.get('/api/bio')
+    queryFn: async () => {
+      const response = await fetch.get('/api/bio')
+      return response.json()
     },
   })
 

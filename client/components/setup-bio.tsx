@@ -17,7 +17,9 @@ export default function SetupBio({ onComplete, hideSkip }: SetupBioProps) {
     if (userInput.trim()) {
       setIsLoading(true)
       try {
-        await fetch.post('/api/bio', { bio: userInput.trim() })
+        const response = await fetch.post('/api/bio', { bio: userInput.trim() })
+        const responseJson = await response.json()
+        console.log('responseJson', responseJson)
         if (onComplete) {
           onComplete()
         } else {

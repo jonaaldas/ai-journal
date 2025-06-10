@@ -15,8 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jonaaldas.chat-app",
-      "buildNumber": "1"
+      "bundleIdentifier": "com.jonaaldas.chat-app"
     },
     "android": {
       "adaptiveIcon": {

@@ -40,8 +40,9 @@ export default function SubscriptionScreen() {
   const { session } = useContext(AuthContext)
   const { data: subscription, isLoading } = useQuery<Subscription>({
     queryKey: ['stripe', 'subscription', session?.user?.id],
-    queryFn: () => {
-      return fetch.get('/api/stripe/subscription')
+    queryFn: async () => {
+      const response = await fetch.get('/api/stripe/subscription')
+      return response.json()
     },
   })
 
